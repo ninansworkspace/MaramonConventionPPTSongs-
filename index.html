@@ -99,7 +99,6 @@ input[type="text"] {
   text-align: center;
   margin-top: 30px;
 }
-    
 
 .pagination button {
   background: rgba(255, 255, 255, 0.85);
@@ -112,7 +111,7 @@ input[type="text"] {
   font-size: 0.95rem;
   transition: 0.2s ease;
 }
-    .next{
+.next{
   background: rgba(255, 255, 255, 0.85);
   color: #ff4040;
   border: none;
@@ -124,6 +123,16 @@ input[type="text"] {
   transition: 0.2s ease;
 
 }
+.page-info {
+  margin: 0 10px;
+  font-weight: bold;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 14px;
+  border-radius: 8px;
+  backdrop-filter: blur(6px);
+}
+
 
 .pagination button:hover:not([disabled]) {
   background: #ffffff;
@@ -146,6 +155,7 @@ input[type="text"] {
     <div id="songList"></div>
     <div class="pagination">
       <button id="prevBtn" onclick="changePage(-1)">Previous</button>
+      <span id="pageInfo" class="page-info">Page 1 of X</span>
       <button id="nextBtn" onclick="changePage(1)">Next</button>
       <a href="https://ninansworkspace.github.io/Kristheeya-Keerthanangal/" target="_blank" class="next">Kristheeya-Keerthanangal PPT ➜</a>
     </div>
@@ -188,18 +198,24 @@ input[type="text"] {
     `;
     list.appendChild(div);
   });
+  }
+  function updatePageInfo() {
+  const maxPage = Math.ceil(filteredSongs.length / itemsPerPage);
+  document.getElementById("pageInfo").textContent = `Page ${currentPage} of ${maxPage}`;
 }
 
 
 
+
     function changePage(delta) {
-      const maxPage = Math.ceil(filteredSongs.length / itemsPerPage);
-      currentPage += delta;
-      if (currentPage < 1) currentPage = 1;
-      if (currentPage > maxPage) currentPage = maxPage;
-      renderSongs();
-      updateButtons();
-    }
+  const maxPage = Math.ceil(filteredSongs.length / itemsPerPage);
+  currentPage += delta;
+  if (currentPage < 1) currentPage = 1;
+  if (currentPage > maxPage) currentPage = maxPage;
+  renderSongs();
+  updateButtons();
+  updatePageInfo(); // 👈
+}
 
     function updateButtons() {
       const maxPage = Math.ceil(filteredSongs.length / itemsPerPage);
@@ -208,14 +224,18 @@ input[type="text"] {
     }
 
     function filterSongs() {
-      const query = document.getElementById("searchInput").value.toLowerCase();
-      filteredSongs = songs.filter(song => song.name.toLowerCase().includes(query));
-      currentPage = 1;
-      renderSongs();
-      updateButtons();
-    }
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  filteredSongs = songs.filter(song => song.name.toLowerCase().includes(query));
+  currentPage = 1;
+  renderSongs();
+  updateButtons();
+  updatePageInfo(); // 👈
+}
 
-    window.onload = fetchSongs;
+    window.onload = async () => {
+  await fetchSongs();
+  updatePageInfo(); // 👈
+    };
   </script>
 </body>
 </html>
