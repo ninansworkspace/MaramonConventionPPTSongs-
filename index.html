@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎵 Song PPTs</title>
+  <style>
+  body {
+  font-family: "Segoe UI", sans-serif;
+  background: url("https://t4.ftcdn.net/jpg/07/41/99/37/360_F_741993769_BWYJVQl4RTgTsyt7Gib6Q63DJUUY6Ieh.jpg") center no-repeat;
+  background-size: cover;
+  margin: 0;
+  padding: 2rem;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  color: #ff0000;
+  margin-bottom: 1.5rem;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  color: #ff0000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  outline: none;
+}
+
+.song {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.25);
+  padding: 15px 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  color: #000000;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.song-number {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #000000;
+  min-width: 30px;
+  text-align: right;
+}
+
+.song-title {
+  font-size: 1.05rem;
+  flex: 1;
+  font-weight: 500;
+}
+
+.open-btn {
+  background: rgba(255, 255, 255, 0.85);
+  color: #ff4040;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(255, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 0, 34, 0.2);
+  transition: all 0.3s ease;
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
+}
+
+.open-btn:hover {
+  background: #ff0000;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0, 123, 255, 0.4);
+}
+
+
+.pagination {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.pagination button {
+  background: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  margin: 0 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: 0.2s ease;
+}
+
+.pagination button:hover:not([disabled]) {
+  background: #ffffff;
+  color: #007BFF;
+}
+
+.pagination button[disabled] {
+  background: rgba(255, 255, 255, 0.15);
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+</style>
+
+</head>
+<body>
+  <div class="container">
+    <h1>🎶 Maramon Convention Songs </h1>
+    <input type="text" id="searchInput" placeholder="Search by song name..." oninput="filterSongs()">
+    <div id="songList"></div>
+    <div class="pagination">
+      <button id="prevBtn" onclick="changePage(-1)">Previous</button>
+      <button id="nextBtn" onclick="changePage(1)">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const apiUrl = "https://script.google.com/macros/s/AKfycbxdoJdlHWltr4SvHYjvPGTg5_hxRbAlz84YlE9yKNUxyHcZLVClVo9g5Gx7UwCC1KK1FQ/exec"; // 🔗 Replace with your deployed Apps Script URL
+    let songs = [];
+    let filteredSongs = [];
+    let currentPage = 1;
+    const itemsPerPage = 10;
+
+    async function fetchSongs() {
+      try {
+        const res = await fetch(apiUrl);
+        songs = await res.json();
+        filteredSongs = songs;
+        renderSongs();
+        updateButtons();
+      } catch (err) {
+        document.getElementById("songList").innerText = "⚠️ Failed to load songs.";
+        console.error(err);
+      }
+    }
+
+    function renderSongs() {
+  const list = document.getElementById("songList");
+  list.innerHTML = "";
+
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const songsToDisplay = filteredSongs.slice(start, end);
+
+  songsToDisplay.forEach(song => {
+    const div = document.createElement("div");
+    div.className = "song";
+    div.innerHTML = `
+      <div class="song-title">${song.name}</div>
+      <a href="${song.link}" target="_blank"class="open-btn">Open </a>
+    `;
+    list.appendChild(div);
+  });
+}
+
+
+
+    function changePage(delta) {
+      const maxPage = Math.ceil(filteredSongs.length / itemsPerPage);
+      currentPage += delta;
+      if (currentPage < 1) currentPage = 1;
+      if (currentPage > maxPage) currentPage = maxPage;
+      renderSongs();
+      updateButtons();
+    }
+
+    function updateButtons() {
+      const maxPage = Math.ceil(filteredSongs.length / itemsPerPage);
+      document.getElementById("prevBtn").disabled = currentPage === 1;
+      document.getElementById("nextBtn").disabled = currentPage === maxPage;
+    }
+
+    function filterSongs() {
+      const query = document.getElementById("searchInput").value.toLowerCase();
+      filteredSongs = songs.filter(song => song.name.toLowerCase().includes(query));
+      currentPage = 1;
+      renderSongs();
+      updateButtons();
+    }
+
+    window.onload = fetchSongs;
+  </script>
+</body>
+</html>
