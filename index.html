@@ -84,6 +84,7 @@
       align-items: center;
       gap: 10px;
       transition: all 0.3s ease;
+      text-align: center;
     }
 
     .song-card:hover {
@@ -94,6 +95,7 @@
     .song-title {
       font-weight: 600;
       font-size: 1.05rem;
+      flex: 1 1 100%;
     }
 
     .song-link a {
@@ -207,7 +209,7 @@
 <!-- Bootstrap JS -->
 <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- JS to Fetch and Render Songs -->
+<!-- JS to Fetch and Render Songs from Google Sheets -->
 <script defer>
   const apiUrl = "https://script.google.com/macros/s/AKfycbxdoJdlHWltr4SvHYjvPGTg5_hxRbAlz84YlE9yKNUxyHcZLVClVo9g5Gx7UwCC1KK1FQ/exec";
 
@@ -225,18 +227,10 @@
 
   async function fetchFiles() {
     try {
-      const cached = localStorage.getItem("maramon_songs");
-      if (cached) {
-        files = JSON.parse(cached);
-        filteredFiles = [...files];
-        renderFiles();
-      }
-
       const res = await fetch(apiUrl);
-      const freshFiles = await res.json();
-      files = freshFiles;
+      const data = await res.json();
+      files = data;
       filteredFiles = [...files];
-      localStorage.setItem("maramon_songs", JSON.stringify(freshFiles));
       renderFiles();
     } catch (err) {
       console.error("❌ Failed to load songs:", err);
@@ -256,8 +250,8 @@
       const item = document.createElement("div");
       item.className = "song-card";
       item.innerHTML = `
-        <span class="song-title">🎵 ${file.name}</span>
-        <span class="song-link w-100 w-sm-auto"><a href="${file.link}" target="_blank">Open</a></span>
+        <span class="song-title">🎵 ${file["Song Name"]}</span>
+        <span class="song-link w-100 w-sm-auto"><a href="${file.URL}" target="_blank">Open</a></span>
       `;
       fileList.appendChild(item);
     });
@@ -270,7 +264,7 @@
 
   function updateSearch() {
     const query = searchInput.value.toLowerCase();
-    filteredFiles = files.filter(file => file.name.toLowerCase().includes(query));
+    filteredFiles = files.filter(file => file["Song Name"].toLowerCase().includes(query));
     currentPage = 1;
     renderFiles();
   }
